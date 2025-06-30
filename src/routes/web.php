@@ -3,20 +3,19 @@
 use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use App\Http\Controllers\InvoiceController;
-
+use App\Providers\Filament\ClientPanelProvider;
 
 /*
 |--------------------------------------------------------------------------
-| Livewire Asset Routes (Do Not Remove)
+| Livewire Asset Routes
 |--------------------------------------------------------------------------
-| Digunakan jika aplikasi menggunakan subfolder atau domain khusus.
 */
 Livewire::setUpdateRoute(function ($handle) {
-    return Route::post(config('app.asset_prefix') . '/livewire/update', $handle);
+    return Route::post('/livewire/update', $handle);
 });
 
 Livewire::setScriptRoute(function ($handle) {
-    return Route::get(config('app.asset_prefix') . '/livewire/livewire.js', $handle);
+    return Route::get('/livewire/livewire.js', $handle);
 });
 
 /*
@@ -30,25 +29,27 @@ Route::get('/', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Client Panel Routes (Harus login)
+| Client Panel Routes
 |--------------------------------------------------------------------------
 */
-
-    // 🔁 Riwayat Pesanan
-  
-    // 📄 Invoice: Tampilkan & Download PDF
+Route::middleware(['auth'])->prefix('client')->group(function () {
+    // Invoice Routes
     Route::get('/invoice/{order}', [InvoiceController::class, 'show'])->name('client.invoice.show');
     Route::get('/invoice/{order}/download', [InvoiceController::class, 'download'])->name('client.invoice.download');
-
-    // 🖨️ Cetak Pesanan
+});
 
 /*
 |--------------------------------------------------------------------------
-| Admin Panel Routes (Harus login)
+| Filament Panel Registration
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->prefix('admin')->group(function () {
-    // 📄 Invoice: Tampilkan dari sisi admin
-    Route::get('/invoice/{order}', [InvoiceController::class, 'show'])->name('admin.invoice.show');
-    Route::get('/invoice/{order}/download', [InvoiceController::class, 'download'])->name('admin.invoice.download');
-});
+
+
+/*
+|--------------------------------------------------------------------------
+| Fallback Route
+|--------------------------------------------------------------------------
+*/
+Route::fallback(function () {
+    return redirect()->route('filament.client.pages.dashboard');
+})->middleware(['auth']);

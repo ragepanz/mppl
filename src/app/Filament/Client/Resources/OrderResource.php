@@ -5,8 +5,10 @@ namespace App\Filament\Client\Resources;
 use App\Filament\Client\Resources\OrderResource\Pages;
 use App\Models\Order;
 use App\Models\Vehicle;
+use App\Filament\Client\Resource\OrderResource\Pages\ViewOrder;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -20,6 +22,7 @@ class OrderResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
     protected static ?string $modelLabel = 'Pesanan';
     protected static ?string $navigationLabel = 'Pesanan Saya';
+    protected static ?string $slug = 'pesanan';
 
     public static function form(Form $form): Form
     {
@@ -101,12 +104,14 @@ class OrderResource extends Resource
                         'pending' => 'warning',
                         'proses' => 'info',
                         'dibayar' => 'success',
+                        'dibatalkan' => 'danger',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'pending' => 'Menunggu Pembayaran',
                         'proses' => 'Sedang Diproses',
                         'dibayar' => 'Pembayaran Berhasil',
+                        'dibatalkan' => 'Dibatalkan',
                         default => $state,
                     }),
                     
@@ -121,6 +126,7 @@ class OrderResource extends Resource
                         'pending' => 'Menunggu Pembayaran',
                         'proses' => 'Sedang Diproses',
                         'dibayar' => 'Pembayaran Berhasil',
+                        'dibatalkan' => 'Dibatalkan',
                     ]),
                     
                 Tables\Filters\Filter::make('tanggal_order')
@@ -146,6 +152,15 @@ class OrderResource extends Resource
                         $record->user_id === auth()->id() && 
                         $record->status === 'pending'),
                         
+                Tables\Actions\Action::make('bayar')
+                    ->label('Bayar')
+                    ->icon('heroicon-o-credit-card')
+                    ->color('success')
+                    ->url(fn (Order $record): string => static::getUrl('pay', ['record' => $record]))
+                    ->visible(fn (Order $record): bool => 
+                        $record->user_id === auth()->id() && 
+                        $record->status === 'pending'),
+                        
                 Tables\Actions\Action::make('batalkan')
                     ->label('Batalkan')
                     ->icon('heroicon-o-x-mark')
@@ -156,7 +171,16 @@ class OrderResource extends Resource
                         $record->status === 'pending')
                     ->action(function (Order $record) {
                         $record->update(['status' => 'dibatalkan']);
+                        
+                        Notification::make()
+                            ->title('Pesanan Dibatalkan')
+                            ->body('Pesanan Anda telah berhasil dibatalkan.')
+                            ->success()
+                            ->send();
                     }),
+            ])
+            ->bulkActions([
+                // No bulk actions needed
             ])
             ->emptyStateActions([
                 Tables\Actions\CreateAction::make(),
@@ -169,6 +193,7 @@ class OrderResource extends Resource
             'index' => Pages\ListOrders::route('/'),
             'create' => Pages\CreateOrder::route('/create'),
             'edit' => Pages\EditOrder::route('/{record}/edit'),
+            'pay' => Pages\PayOrder::route('/{record}/pay'),
         ];
     }
 
@@ -194,7 +219,7 @@ class OrderResource extends Resource
 
     public static function canDelete(Model $record): bool
     {
-        return false; // Disable delete action
+        return false;
     }
 
     public static function canView(Model $record): bool

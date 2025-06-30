@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('vehicle_id')->constrained()->cascadeOnDelete();
             $table->date('tanggal_order');
             $table->enum('status', ['pending', 'proses', 'dibayar'])->default('pending');
+            $table->string('payment_proof')->nullable();
             $table->unsignedBigInteger('total_harga');
             $table->text('catatan')->nullable();
             $table->timestamps();

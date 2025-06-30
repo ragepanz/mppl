@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             VehicleSeeder::class,
             OrderSeeder::class,
+            PaymentAccountSeeder::class,
         ]);
         $this->seedUsers();
     }

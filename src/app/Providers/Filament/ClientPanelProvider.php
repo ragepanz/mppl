@@ -28,10 +28,12 @@ class ClientPanelProvider extends PanelProvider
             ->path('client')
             ->login()
             ->registration()
+            ->passwordReset()
+            ->emailVerification()
+            ->profile()
             ->authGuard('web')
             ->maxContentWidth('full')
             ->spa()
-            //->defaultRole('user') 
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -40,14 +42,12 @@ class ClientPanelProvider extends PanelProvider
                     ->label('Admin Panel')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->url('/admin')
-                    ->visible(fn (): bool => auth()->user()->hasRole('super_admin'))
+                    ->visible(fn (): bool => auth()->check() && auth()->user()->hasRole('super_admin'))
             ])
             ->discoverResources(in: app_path('Filament/Client/Resources'), for: 'App\\Filament\\Client\\Resources')
             ->discoverPages(in: app_path('Filament/Client/Pages'), for: 'App\\Filament\\Client\\Pages')
             ->pages([
                 Pages\Dashboard::class,
-               // StudioAvailability::class,
-                /* PaymentBooking::class */
             ])
             ->discoverWidgets(in: app_path('Filament/Client/Widgets'), for: 'App\\Filament\\Client\\Widgets')
             ->widgets([
@@ -72,12 +72,4 @@ class ClientPanelProvider extends PanelProvider
                 Authenticate::class,
             ]);
     }
-
-    public function resources(): array
-{
-    return [
-        //\App\Filament\Client\Resources\BookingResource::class,
-    ];
-}
-
 }

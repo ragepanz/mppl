@@ -15,11 +15,21 @@ class Order extends Model
         'tanggal_order',
         'status',
         'total_harga',
-        'catatan'
+        'payment_method',
+        'payment_amount',
+        'payment_date',
+        'payment_proof',
+        'payment_notes',
+        'payment_verified_at',
+        'payment_rejected_at'
     ];
 
     protected $casts = [
         'tanggal_order' => 'date',
+        'payment_details' => 'array',
+        'payment_date' => 'date',
+        'payment_verified_at' => 'datetime',
+        'payment_rejected_at' => 'datetime',
     ];
 
     public function user(): BelongsTo
@@ -35,5 +45,15 @@ class Order extends Model
     public function salesReport(): HasOne
     {
         return $this->hasOne(SalesReport::class);
+    }
+
+    public function scopePendingPayment($query)
+    {
+        return $query->where('status', 'pending')->whereNotNull('payment_proof');
+    }
+
+    public function payment(): HasOne
+    {
+        return $this->hasOne(OrderPayment::class);
     }
 }
