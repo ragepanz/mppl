@@ -28,9 +28,28 @@ class Order extends Model
         'tanggal_order' => 'date',
         'payment_details' => 'array',
         'payment_date' => 'date',
+        'payment_proof' => 'string',
         'payment_verified_at' => 'datetime',
         'payment_rejected_at' => 'datetime',
     ];
+
+    public function setPaymentProofAttribute($value)
+    {
+        // Jika upload baru, simpan sebagai path relative
+        if ($value instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+            $this->attributes['payment_proof'] = 'payment-proofs/' . $value->hashName();
+        }
+        // Jika dari form edit, simpan sebagai nama file saja
+        elseif (is_string($value)) {
+            $this->attributes['payment_proof'] = basename($value);
+        }
+    }
+
+    public function getPaymentProofUrlAttribute()
+    {
+        if (!$this->payment_proof) return null;
+        return asset('storage/payment-proofs/' . basename($this->payment_proof));
+    }
 
     public function user(): BelongsTo
     {

@@ -74,7 +74,7 @@ class OrderResource extends Resource
                     ->readOnly(),
                     
                 Forms\Components\Textarea::make('catatan')
-                    ->label('Catatan Tambahan')
+                    ->label('Alamat')
                     ->columnSpanFull(),
             ]);
     }

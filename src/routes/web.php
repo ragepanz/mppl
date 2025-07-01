@@ -33,9 +33,9 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->prefix('client')->group(function () {
-    // Invoice Routes
-    Route::get('/invoice/{order}', [InvoiceController::class, 'show'])->name('client.invoice.show');
-    Route::get('/invoice/{order}/download', [InvoiceController::class, 'download'])->name('client.invoice.download');
+    Route::get('/invoice/{order}', [InvoiceController::class, 'download'])
+     ->name('invoice.download');
+    
 });
 
 /*
